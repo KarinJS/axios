@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/KarinJS/axios/compare/v1.0.0...v1.0.1) (2025-04-14)
+
+
+### Bug Fixes
+
+* ci build ([f43e64f](https://github.com/KarinJS/axios/commit/f43e64f8237d9af52e263efb101771a0a2fabf8b))
+
 ## 1.0.0 (2025-04-14)
 
 
