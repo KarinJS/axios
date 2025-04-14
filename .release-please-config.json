@@ -1,0 +1,93 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "include-component-in-tag": true,
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "✨ Features",
+      "hidden": false
+    },
+    {
+      "type": "fix",
+      "section": "🐛 Bug Fixes",
+      "hidden": false
+    },
+    {
+      "type": "perf",
+      "section": "⚡️ Performance",
+      "hidden": false
+    },
+    {
+      "type": "revert",
+      "section": "⏪️ Reverts",
+      "hidden": false
+    },
+    {
+      "type": "docs",
+      "section": "📝 Documentation",
+      "hidden": false
+    },
+    {
+      "type": "style",
+      "section": "💄 Styles",
+      "hidden": false
+    },
+    {
+      "type": "chore",
+      "section": "🎫 Chores",
+      "hidden": false
+    },
+    {
+      "type": "refactor",
+      "section": "♻️ Code Refactoring",
+      "hidden": false
+    },
+    {
+      "type": "test",
+      "section": "✅ Tests",
+      "hidden": false
+    },
+    {
+      "type": "build",
+      "section": "📦️ Build System",
+      "hidden": false
+    },
+    {
+      "type": "ci",
+      "section": "🎡 Continuous Integration",
+      "hidden": false
+    }
+  ],
+  "packages": {
+    "packages/core": {
+      "release-type": "node",
+      "package-name": "node-karin",
+      "component": "core",
+      "tag-separator": "-",
+      "scope": "core"
+    },
+    "packages/cli": {
+      "release-type": "node",
+      "package-name": "@karinjs/cli",
+      "component": "cli",
+      "tag-separator": "-",
+      "scope": "cli"
+    },
+    "packages/create-karin": {
+      "release-type": "node",
+      "package-name": "create-karin",
+      "component": "create-karin",
+      "tag-separator": "-",
+      "scope": "create-karin"
+    },
+    "packages/web": {
+      "release-type": "node",
+      "package-name": "karin-webui",
+      "component": "web",
+      "tag-separator": "-",
+      "scope": "web"
+    }
+  },
+  "commit-search-depth": 50
+}
