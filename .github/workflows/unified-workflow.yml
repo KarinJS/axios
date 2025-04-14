@@ -34,6 +34,8 @@ jobs:
         id: release
         with:
           release-type: node
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
       # 设置环境
       - name: 设置Node.js
         uses: actions/setup-node@v4
