@@ -23,6 +23,8 @@
   },
   "build": {
     "mainVersion": "1.8.4",
-    "versionMap": {}
+    "versionMap": {
+      "1.8.4": "1.0.0"
+    }
   }
 }
