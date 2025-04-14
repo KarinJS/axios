@@ -1,0 +1,124 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  # 手动触发更新
+  workflow_dispatch:
+    inputs:
+      pkg_version:
+        description: '要使用的 axios 版本'
+        required: true
+        default: '1.8.4'
+        type: string
+
+# 赋予必要权限
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # 步骤一：触发检查 - 自动发布或手动更新都会触发后续步骤
+  trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ github.event_name == 'workflow_dispatch' || steps.release.outputs.release_created }}
+      pkg_version: ${{ github.event.inputs.pkg_version }}
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v4 
+      # 自动发布 - 使用release-please-action
+      - name: 创建发布PR
+        if: github.event_name == 'push'
+        uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: node
+      # 设置环境
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      
+
+  # 步骤二：手动更新准备 - 只在手动触发时运行
+  prepare:
+    needs: trigger
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v4
+      # 设置环境
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      # 更新axios版本
+      - name: 更新axios版本
+        run: npm pkg set devDependencies.axios=${{ github.event.inputs.pkg_version }}
+      # 版本号+1
+      - name: 版本号+1
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+          VERSION_PARTS[2]=$((VERSION_PARTS[2] + 1))
+          NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}"
+          npm pkg set version=$NEW_VERSION
+  # 步骤三：发布流程
+  publish:
+    needs: [trigger, prepare]
+    # 只在触发条件满足时运行（自动发布成功或手动触发）
+    if: |
+      always() && (
+        (github.event_name == 'push' && needs.trigger.outputs.should_publish == 'true') || 
+        (github.event_name == 'workflow_dispatch')
+      )
+    runs-on: ubuntu-latest
+    steps:    
+      # 检出代码 - 这是必须的，因为后续步骤需要操作代码
+      - uses: actions/checkout@v4
+        with:
+          # 确保获取最新代码，特别是手动更新后的更改
+          ref: ${{ github.ref }}          
+      # 设置Node.js
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org          
+      # 设置pnpm
+      - name: 设置pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9          
+      # 安装依赖
+      - name: 安装依赖
+        run: pnpm install      
+      # 获取axios版本和当前包版本，更新versionMap
+      - name: 更新版本映射
+        run: |
+          pkg_version=$(npm pkg get devDependencies.axios | tr -d '"')
+          PACKAGE_VERSION=$(npm pkg get version | tr -d '"')
+          echo "更新版本映射: axios $pkg_version -> package $PACKAGE_VERSION"
+          npm pkg set "build.versionMap[$pkg_version]=$PACKAGE_VERSION"      
+      # 提交更改并推送
+      - name: 提交版本映射更新
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git add package.json
+          git commit -m "chore: update version map for axios version [skip ci]" || echo "没有变更需要提交"
+          git push || echo "没有变更需要推送"
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}      
+      # 删除开发依赖
+      - name: 删除开发依赖
+        run: npm pkg delete devDependencies      
+      # 发布到 npm
+      - name: 发布到 npm
+        run: npm run pub
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
