@@ -92,6 +92,9 @@ jobs:
       # 安装依赖
       - name: 安装依赖
         run: pnpm install      
+      # 打包构建
+      - name: 打包构建
+        run: pnpm build
       # 获取axios版本和当前包版本，更新versionMap
       - name: 更新版本映射
         run: |
