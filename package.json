@@ -1,6 +1,6 @@
 {
   "name": "@karinjs/axios",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Axios branch, very small and fast, with a small footprint, and no dependencies.",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
